@@ -202,7 +202,7 @@ ceph_config_keys: [] # DON'T TOUCH ME
 #
 # Examples:
 # Journal collocated on Filestore: ceph_osd_docker_prepare_env: -e CLUSTER={{ cluster }} -e OSD_JOURNAL_SIZE={{ journal_size }} -e OSD_FORCE_ZAP=1 -e OSD_FILESTORE=1
-# Dedicated journal on Filestore: ceph_osd_docker_prepare_env: -e CLUSTER={{ cluster }} -e OSD_JOURNAL_SIZE={{ journal_size }} -e OSD_FORCE_ZAP=1 -e OSD_JOURNAL={{ dedicated_devices[0] }} -e OSD_FILESTORE=1
+# Dedicated journal on Filestore: ceph_osd_docker_prepare_env: -e CLUSTER={{ cluster }} -e OSD_JOURNAL_SIZE={{ journal_size }} -e OSD_FORCE_ZAP=1 -e OSD_JOURNAL={{ dedicated_devices|shuffle(seed=inventory_hostname) }} -e OSD_FILESTORE=1
 # Encrypted OSD on Filestore: ceph_osd_docker_prepare_env: -e CLUSTER={{ cluster }} -e OSD_JOURNAL_SIZE={{ journal_size }} -e OSD_FORCE_ZAP=1 -e OSD_DMCRYPT=1 -e OSD_FILESTORE=1
 # Encrypted OSD with dedicated journal on Filestore: ceph_osd_docker_prepare_env: -e CLUSTER={{ cluster }} -e OSD_JOURNAL_SIZE={{ journal_size }} -e OSD_FORCE_ZAP=1 -e OSD_DMCRYPT=1 -e OSD_JOURNAL={{ dedicated_devices[0] }} -e OSD_FILESTORE=1
 #
