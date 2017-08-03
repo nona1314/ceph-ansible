@@ -1,2 +1,2 @@
-ceph_rhcs: true
+ceph_repository: rhcs
 fetch_directory: ~/ceph-ansible-keys
