@@ -1,1 +1,58 @@
 ---
+- name: os compatibility check (rhel 7.3)
+  assert:
+    that:
+      - "ansible_distribution == 'RedHat'"
+      - "ansible_distribution_version == '7.3'"
+
+# handle the environment pre-req's for EL7, and package dependencies
+- include: pkgs_prereqs_el7.yml
+  when:
+    - ansible_os_family == "RedHat"
+    - ( perform_system_checks is undefined or perform_system_checks )
+
+# this task deploys the default ceph connection settings needed by the config
+# management modules. It only needs to run once, so can be skipped on subsequent
+# configuration updates by specifing deploy_settings: no in the group vars file
+- include: deploy_gw_conf.yml
+  when:
+    - ansible_os_family == "RedHat"
+    - ( deploy_settings is undefined or deploy_settings )
+
+# deploy_ssl_keys used the ansible controller to create self-signed crt/key/pub files
+# and transfers them to /etc/ceph directory on each controller. SSL certs are used by
+# the API for https support.
+- include: deploy_ssl_keys.yml
+
+- name: igw_gateway (tgt) | configure iscsi target (gateway)
+  igw_gateway:
+    mode: "target"
+    gateway_iqn: "{{ gateway_iqn }}"
+    gateway_ip_list: "{{ gateway_ip_list }}"
+  register: target
+
+- name: igw_lun | configure luns (create/map rbds and add to lio)
+  igw_lun:
+    pool: "{{ item.pool }}"
+    image: "{{ item.image }}"
+    size: "{{ item.size }}"
+    host: "{{ item.host }}"
+    state: "{{ item.state }}"
+  with_items: "{{ rbd_devices|default([]) }}"
+  register: images
+
+- name: igw_gateway (map) | map luns to the iscsi target
+  igw_gateway:
+    mode: "map"
+    gateway_iqn: "{{ gateway_iqn }}"
+    gateway_ip_list: "{{ gateway_ip_list }}"
+  register: luns
+
+- name: igw_client | configure client connectivity
+  igw_client:
+    client_iqn: "{{ item.client }}"
+    image_list: "{{ item.image_list }}"
+    chap: "{{ item.chap }}"
+    state: "{{ item.status }}"
+  with_items: "{{ client_connections|default([]) }}"
+  register: clients

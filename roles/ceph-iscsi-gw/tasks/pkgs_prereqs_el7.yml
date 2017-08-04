@@ -1,0 +1,32 @@
+---
+# These are the dependencies for the gateway. The Red Hat solution uses dm-multipath as part of a
+# strategy to eliminate stale I/O when data paths are lost. Targetcli provides an interface to the
+# LIO configuration to check what's been done!
+- name: check required rpms are installed
+  yum:
+    name: "{{ item.rpm }}"
+    state: latest
+  with_items:
+    - rpm: tcmu-runner
+    - rpm: ceph-iscsi-config
+    - rpm: targetcli
+    - rpm: ceph-common
+
+- name: check the status of the target.service override
+  stat:
+    path: /etc/systemd/system/target.service
+  register: target
+
+- name: mask the target service - preventing manual start
+  systemd:
+    name: target
+    masked: yes
+    enabled: no
+  when:
+    - target.stat.exists == False or (target.stat.exists and target.stat.islnk == False)
+
+- name: enable the rbd-target-gw service and make sure it's running
+  service:
+    name: rbd-target-gw
+    enabled: yes
+    state: started
