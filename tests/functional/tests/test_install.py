@@ -22,15 +22,6 @@ class TestInstall(object):
 
 class TestCephConf(object):
 
-    def test_ceph_config_has_inital_members_line(self, node, File):
-        assert File(node["conf_path"]).contains("^mon initial members = .*$")
-
-    def test_initial_members_line_has_correct_value(self, node, File):
-        mons = ",".join("ceph-%s" % host
-                        for host in node["vars"]["groups"]["mons"])
-        line = "mon initial members = {}".format(mons)
-        assert File(node["conf_path"]).contains(line)
-
     def test_ceph_config_has_mon_host_line(self, node, File):
         assert File(node["conf_path"]).contains("^mon host = .*$")
 
