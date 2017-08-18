@@ -81,6 +81,7 @@
     state: "{{ (upgrade_ceph_packages|bool) | ternary('latest','present') }}"
   when:
     - mon_group_name in group_names
+    - ceph_origin != 'local'
 
 - name: install distro or red hat storage ceph osd
   package:
@@ -88,6 +89,7 @@
     state: "{{ (upgrade_ceph_packages|bool) | ternary('latest','present') }}"
   when:
     - osd_group_name in group_names
+    - ceph_origin != 'local'
 
 - name: install distro or red hat storage ceph mds
   package:
@@ -95,6 +97,7 @@
     state: "{{ (upgrade_ceph_packages|bool) | ternary('latest','present') }}"
   when:
     - mds_group_name in group_names
+    - ceph_origin != 'local'
 
 - name: install distro or red hat storage ceph-fuse
   package:
@@ -102,6 +105,7 @@
     state: "{{ (upgrade_ceph_packages|bool) | ternary('latest','present') }}"
   when:
     - client_group_name in group_names
+    - ceph_origin != 'local'
 
 - name: install distro or red hat storage ceph base
   package:
@@ -109,18 +113,23 @@
     state: "{{ (upgrade_ceph_packages|bool) | ternary('latest','present') }}"
   when:
     - client_group_name in group_names
+    - ceph_origin != 'local'
 
 - name: install ceph-test
   package:
     name: ceph-test
     state: "{{ (upgrade_ceph_packages|bool) | ternary('latest','present') }}"
-  when: ceph_test
+  when:
+    - ceph_test
+    - ceph_origin != 'local'
 
 - name: install rados gateway
   package:
     name: ceph-radosgw
     state: "{{ (upgrade_ceph_packages|bool) | ternary('latest','present') }}"
-  when: rgw_group_name in group_names
+  when:
+    - rgw_group_name in group_names
+    - ceph_origin != 'local'
 
 - name: install nfs ceph gateway
   package:
@@ -128,6 +137,7 @@
   when:
     - nfs_group_name in group_names
     - nfs_file_gw
+    - ceph_origin != 'local'
 
 - name: install nfs rgw gateway
   package:
@@ -138,6 +148,7 @@
   when:
     - nfs_group_name in group_names
     - nfs_obj_gw
+    - ceph_origin != 'local'
 
 - name: install ceph mgr
   package:
@@ -146,3 +157,4 @@
   when:
     - mgr_group_name in group_names
     - ceph_release_num.{{ ceph_release }} > ceph_release_num.jewel
+    - ceph_origin != 'local'

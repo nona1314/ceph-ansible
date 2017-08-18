@@ -109,7 +109,7 @@
 
 # override ceph_stable_release for ceph_dev and rhcs installations since ceph_stable_release is not mandatory
 - include: ./release-rhcs.yml
-  when: (ceph_rhcs or ceph_dev)
+when: (ceph_rhcs or ceph_dev or ceph_origin == 'local')
   tags:
     - always
 
